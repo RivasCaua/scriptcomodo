@@ -1,0 +1,90 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Função que busca o valor de qualquer parâmetro da URL (ex: utm_source, utm_medium...)
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // Lista dos parâmetros UTM que quero capturar
+    var utmParams = [
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'utm_term',
+        'utm_content'
+    ];
+
+    // Objeto onde vou guardar os dados que forem capturados
+    var capturedData = {};
+
+    // Captura os valores dos parâmetros UTM da URL
+    utmParams.forEach(function (param) {
+        capturedData[param] = getUrlParameter(param);
+    });
+
+    // Captura o caminho da página (ex: /cozinha-planejada)
+    capturedData['pagina_captura'] = window.location.pathname;
+
+    // Captura a origem base da página acessada (ex: https://lp1.comodoplanejados.com.br)
+    // Isso garante que o valor seja sempre a raiz da landing page, independente do caminho ou parâmetros
+    capturedData['referrer_url'] = window.location.origin;
+
+    // Função que preenche os campos do formulário do Elementor com os dados capturados
+    window.fillFieldsInFormByElement = function (formElement) {
+
+        // Preenche os campos UTM no formulário
+        utmParams.forEach(function (param) {
+            var inputField = formElement.querySelector('[name="form_fields[' + param + ']"]') ||
+                formElement.querySelector('#form-field-' + param);
+
+            if (inputField) {
+                inputField.value = capturedData[param];
+                console.log('Preenchido: ' + param + ' com valor: ' + capturedData[param]);
+            }
+        });
+
+        // Preenche o campo referrer_url com a base da URL atual (sem query string ou slug)
+        var refField = formElement.querySelector('[name="form_fields[referrer_url]"]') ||
+            formElement.querySelector('#form-field-referrer_url');
+
+        if (refField) {
+            refField.value = capturedData['referrer_url'];
+            console.log('Preenchido: referrer_url com valor: ' + capturedData['referrer_url']);
+        }
+
+        // Preenche o campo pagina_captura com o caminho atual da página
+        var paginaCapturaField = formElement.querySelector('[name="form_fields[pagina_captura]"]') ||
+            formElement.querySelector('#form-field-pagina_captura');
+
+        if (paginaCapturaField) {
+            paginaCapturaField.value = capturedData['pagina_captura'];
+            console.log('Preenchido: pagina_captura com valor: ' + capturedData['pagina_captura']);
+        }
+    };
+
+    // Assim que a página carrega, já preencho os formulários que estiverem visíveis
+    var initialForms = document.querySelectorAll('.elementor-form');
+    initialForms.forEach(function (form) {
+        window.fillFieldsInFormByElement(form);
+    });
+
+    // Observo se novos formulários forem inseridos dinamicamente (como em popups ou conteúdo AJAX)
+    var observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+                if (node.nodeType === 1 && node.matches('.elementor-form')) {
+                    window.fillFieldsInFormByElement(node);
+                }
+            });
+        });
+    });
+
+    // Ativo o observer na página inteira
+    observer.observe(document.body, { childList: true, subtree: true });
+
+});
+</script>
