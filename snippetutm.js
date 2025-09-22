@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Captura campos adicionais
     capturedData['pagina_captura'] = window.location.pathname;
-    capturedData['referrer_url'] = window.location.origin;
+    capturedData['referrer_url'] = window.location.href; // <-- LINHA CORRIGIDA
 
     // Função para preencher os campos do formulário com os dados capturados
     window.fillFieldsInFormByElement = function (formElement) {
