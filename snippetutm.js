@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Lista de todos os parâmetros que queremos capturar da URL
+    // O parâmetro 'referrer' (da URL) foi omitido, pois 'utm_referrer' será preenchido com a URL base.
     var paramNames = [
         'utm_source',
         'utm_medium',
@@ -21,8 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'utm_term',
         'utm_content',
         'gclid',
-        'fbclid',
-        'referrer'
+        'fbclid'
     ];
 
     var capturedData = {};
@@ -69,7 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Captura campos adicionais
     capturedData['pagina_captura'] = window.location.pathname;
-    capturedData['referrer_url'] = window.location.href; // <-- LINHA CORRIGIDA
+    
+    // Captura apenas a origem (protocolo + domínio)
+    capturedData['utm_referrer'] = window.location.origin; 
 
     // Função para preencher os campos do formulário com os dados capturados
     window.fillFieldsInFormByElement = function (formElement) {
