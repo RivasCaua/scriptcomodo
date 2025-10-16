@@ -1,7 +1,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Função que busca o valor de qualquer parâmetro da URL de forma segura
+    // --- Função que busca o valor de qualquer parâmetro da URL ---
     function getUrlParameter(name) {
         name = name.replace(/[\[\]]/g, '\\$&');
         var regex = new RegExp('[\\?&]' + name + '(=([^&#]*)|&|#|$)');
@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return value;
     }
 
-    // Lista de todos os parâmetros que queremos capturar da URL
-    // O parâmetro 'referrer' (da URL) foi omitido, pois 'utm_referrer' será preenchido com a URL base.
+    // --- Lista de parâmetros UTM e outros ---
     var paramNames = [
         'utm_source',
         'utm_medium',
@@ -27,58 +26,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var capturedData = {};
 
-    // Captura e traduz os parâmetros da URL
+    // --- Captura os parâmetros da URL ---
     paramNames.forEach(function (param) {
-        var rawValue = getUrlParameter(param);
-        
-        // Lógica para traduzir o utm_medium do Google Ads para algo legível
-        if (param === 'utm_medium' && getUrlParameter('utm_source') === 'google_ads') {
-            switch (rawValue) {
-                case 'g':
-                    capturedData[param] = 'Pesquisa';
-                    break;
-                case 's':
-                    capturedData[param] = 'Parceiros de Pesquisa';
-                    break;
-                case 'd':
-                    capturedData[param] = 'Display';
-                    break;
-                case 'ytv':
-                    capturedData[param] = 'YouTube';
-                    break;
-                case 'vp':
-                    capturedData[param] = 'Parceiros de Vídeo';
-                    break;
-                case 'gtv':
-                    capturedData[param] = 'Google TV';
-                    break;
-                case 'x':
-                    capturedData[param] = 'Performance Max';
-                    break;
-                case 'e':
-                    capturedData[param] = 'Apps de Engajamento';
-                    break;
-                default:
-                    capturedData[param] = rawValue;
-                    break;
-            }
-        } else {
-            capturedData[param] = rawValue;
-        }
+        capturedData[param] = getUrlParameter(param);
     });
 
-    // Captura campos adicionais
+    // --- Campos adicionais ---
     capturedData['pagina_captura'] = window.location.pathname;
-    
-    // Captura apenas a origem (protocolo + domínio)
-    capturedData['utm_referrer'] = window.location.origin; 
 
-    // Função para preencher os campos do formulário com os dados capturados
+    // Captura apenas o domínio do site (ex: https://seudominio.com.br)
+    capturedData['utm_referrer'] = window.location.origin;
+
+    // --- Função para preencher campos de formulários ---
     window.fillFieldsInFormByElement = function (formElement) {
-        // Itera sobre todos os dados capturados e preenche os campos correspondentes
         for (var key in capturedData) {
             if (capturedData.hasOwnProperty(key)) {
-                // Tenta encontrar o campo pelo 'name' ou 'id'
                 var inputField = formElement.querySelector('[name="form_fields[' + key + ']"]') ||
                                  formElement.querySelector('#form-field-' + key);
 
@@ -92,13 +54,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Preenche os formulários que já estão visíveis ao carregar a página
+    // --- Preenche formulários já existentes ---
     var initialForms = document.querySelectorAll('.elementor-form');
     initialForms.forEach(function (form) {
         window.fillFieldsInFormByElement(form);
     });
 
-    // Observa se novos formulários são inseridos dinamicamente (como em popups)
+    // --- Observa formulários carregados dinamicamente (como popups) ---
     var observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             mutation.addedNodes.forEach(function (node) {
