@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Campos adicionais ---
     capturedData['pagina_captura'] = window.location.pathname;
 
-    // Captura apenas o domínio do site (ex: https://seudominio.com.br)
-    capturedData['utm_referrer'] = window.location.origin;
+    // Captura o DOMÍNIO + SLUG (ex: https://seudominio.com.br/pagina)
+    capturedData['utm_referrer'] = window.location.origin + window.location.pathname;
 
     // --- Função para preencher campos de formulários ---
     window.fillFieldsInFormByElement = function (formElement) {
